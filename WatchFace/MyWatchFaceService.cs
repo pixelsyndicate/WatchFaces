@@ -12,7 +12,6 @@ using Android.Text.Format;
 using Android.Util;
 using Android.Views;
 using Java.Util.Concurrent;
-using TimeZone = Java.Util.TimeZone;
 
 namespace WatchFace
 {
@@ -67,6 +66,8 @@ namespace WatchFace
             private bool registeredTimezoneReceiver;
             private Paint secondPaint;
 
+            private WatchHand secHand, minHand, hrHand;
+
             // For painting the tick marks around the edge of the clock face:
             private Paint hTickPaint;
             private Paint mTickPaint;
@@ -112,44 +113,29 @@ namespace WatchFace
                 // Initialize paint objects for drawing the clock hands and tick marks:
 
                 // Hour hand:   
-                hourPaint = WatchFaceFactory.GetHourHand(Color.White);
-                //hourPaint = new Paint();
-                //hourPaint.SetARGB(255, 255, 255, 255);
-                //hourPaint.StrokeWidth = 5.0f;
-                //hourPaint.AntiAlias = true;
-                //hourPaint.StrokeCap = Paint.Cap.Round;
+                hourPaint = WatchFaceFactory.GetHourHand(Color.White, true);
 
                 // Minute hand:
-                minutePaint = WatchFaceFactory.GetMinuteHand(Color.White);
-                //minutePaint = new Paint();
-                //minutePaint.SetARGB(255, 255, 255, 255);
-                //minutePaint.StrokeWidth = 3.0f;
-                //minutePaint.AntiAlias = true;
-                //minutePaint.StrokeCap = Paint.Cap.Round;
+                minutePaint = WatchFaceFactory.GetMinuteHand(Color.White, true);
 
                 // Seconds hand:
-                secondPaint = WatchFaceFactory.GetSecondHand(Color.Red);
-                //secondPaint = new Paint();
-                //secondPaint.SetARGB(255, 255, 0, 0);
-                //secondPaint.StrokeWidth = 2.0f;
-                //secondPaint.AntiAlias = true;
-                //secondPaint.StrokeCap = Paint.Cap.Round;
+                secondPaint = WatchFaceFactory.GetSecondHand(Color.Red, true);
 
-                // Tick marks around the edge of the face:
-                //tickPaint = new Paint();
-                //tickPaint.SetARGB(100, 255, 255, 255);
-                //tickPaint.StrokeWidth = 2.0f;
-                //tickPaint.AntiAlias = true;
+                // Ticks:
+                hTickPaint = new Paint() { AntiAlias = true };
+                hTickPaint.SetARGB(255, 210, 0, 0);
+                hTickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
+
+                mTickPaint = new Paint() { AntiAlias = true };
+                mTickPaint.SetARGB(255, 159, 191, 255);
+                mTickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
 
                 // Instantiate the time object:
                 _time = new Time();
 
                 // Start a timer for redrawing the click face (second hand) every second.
                 // How to stop the timer? It shouldn't run in ambient mode...
-                timerSeconds = new Timer(state =>
-                    {
-                        Invalidate();
-                    }, null,
+                timerSeconds = new Timer(state => { Invalidate(); }, null,
                     TimeSpan.FromMilliseconds(InterActiveUpdateRateMs),
                     TimeSpan.FromMilliseconds(InterActiveUpdateRateMs));
             }
@@ -219,6 +205,7 @@ namespace WatchFace
                 var width = bounds.Width();
                 var height = bounds.Height();
 
+
                 // Draw the background, scaled to fit:
                 if (backgroundScaledBitmap == null ||
                     backgroundScaledBitmap.Width != width || backgroundScaledBitmap.Height != height)
@@ -230,6 +217,13 @@ namespace WatchFace
                 var centerX = width / 2.0f;
                 var centerY = height / 2.0f;
 
+                // define some hands   
+                var hrLength = centerX - 80;
+                hrHand = new WatchHand(HandType.HOURS, centerX, centerY, hrLength) { paint = hourPaint };
+                var minLength = centerX - 40;
+                minHand = new WatchHand(HandType.MINUTES, centerX, centerY, minLength) { paint = minutePaint };
+                var secLength = centerX - 20;
+                secHand = new WatchHand(HandType.SECONDS, centerX, centerY, secLength) { paint = secondPaint };
 
                 // draw a central hub (bullet hole?)
                 // Draw the background, scaled to fit:
@@ -243,66 +237,43 @@ namespace WatchFace
 
 
                 // Draw the hour ticks:
-
-                var hticks = new WatchTicks(centerX, centerY, 20, 3, 0);
-                hticks.TickPaint.SetARGB(255, 210, 0, 0);
-                hticks.TickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
+                var hticks = new WatchTicks(centerX, centerY, 20, 3, 0) { TickPaint = hTickPaint };
                 hticks.DrawTicks(canvas, 12);
 
-
                 // Draw the minute ticks:
-                var mt = new WatchTicks(centerX, centerY, 10, 2, -10);
-                mt.TickPaint.SetARGB(255, 159, 191, 255);
-                mt.TickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
-                mt.DrawTicks(canvas, 60, 5);
+                var mticks = new WatchTicks(centerX, centerY, 10, 2, -10) { TickPaint = mTickPaint };
+                mticks.DrawTicks(canvas, 60, 5);
 
-
-                // Calculate the angle of rotation and length for each hand:
-              //  var secRot = WatchFaceFactory.GetSecondHandRotation(_time); // _time.Second / 30f * (float)Math.PI;
-                var minutes = _time.Minute;
-                var minRot = WatchFaceFactory.GetMinuteHandRotation(_time); // minutes / 30f * (float)Math.PI;
-                var hrRot = WatchFaceFactory.GetHourHandRotation(_time); //(_time.Hour + minutes / 60f) / 6f * (float)Math.PI;
-
-                // the lengths of each hand (half-of-face minus some value)
-                var secLength = centerX - 20;
-                var minLength = centerX - 40;
-                var hrLength = centerX - 80;
 
                 // Draw the second hand only in interactive mode:
                 if (!IsInAmbientMode)
                 {
-
-                    // blur, position x offset, position y offset, color 
-                    secondPaint.SetShadowLayer(0.9f, 2f, 2f, Color.Argb(178, 50, 50, 50)); // 178 alpha = 70% opacity , (50,50,50) = #323232
-                 //   var c = WatchFaceFactory.GetDrawLineStartAndStops(centerX, centerY, secRot, secLength);
-                    var secHand = new WatchHand(HandType.SECONDS,centerX, centerY,secLength)
-                    {
-                        paint = secondPaint,
-                        startCoords = new Coords(){X = centerX ,Y=centerY},
-                    };
                     secHand.DrawHand(canvas, _time);
-
-                    //canvas.DrawLine(centerX, centerY, c.ePos.X, c.ePos.Y, secondPaint);
-
-
                 }
 
-
-
                 // Draw the minute hand:
-                var m = WatchFaceFactory.GetDrawLineStartAndStops(centerX, centerY, minRot, minLength);
-                // blur, position x offset, position y offset, color 
-                minutePaint.SetShadowLayer(0.9f, 2f, 2f, Color.Argb(178, 50, 50, 50)); // 178 alpha = 70% opacity , (50,50,50) = #323232
-
-                canvas.DrawLine(centerX, centerY, m.ePos.X, m.ePos.Y, minutePaint);
-
+                minHand.DrawHand(canvas, _time);
 
                 // Draw the hour hand:
-                var h = WatchFaceFactory.GetDrawLineStartAndStops(centerX, centerY, hrRot, hrLength);
-                // add a dropshadow to the hour hand
-                // blur, position x offset, position y offset, color 
-                hourPaint.SetShadowLayer(0.9f, 2f, 2f, Color.Argb(178, 50, 50, 50)); // 178 alpha = 70% opacity , (50,50,50) = #323232
-                canvas.DrawLine(centerX, centerY, h.ePos.X, h.ePos.Y, hourPaint);
+                hrHand.DrawHand(canvas, _time);
+
+
+                // draw something with the date
+                var str = DateTime.Now.ToString("h:mm tt");
+                str = DateTime.Now.ToString("ddd, dd MMM");
+                var textPaint = new Paint()
+                {
+                    Alpha = 255,
+                    AntiAlias = true,
+                    Color = Color.Black,
+                    TextSize = 24f,
+                    Typeface = { },
+                };
+                textPaint.SetTypeface(Typeface.Create("Arial",TypefaceStyle.Bold));
+                
+                canvas.DrawText(str,
+                    (float)(centerX+30),
+                    (float)(centerY+60), textPaint);
 
 
             }
@@ -324,7 +295,7 @@ namespace WatchFace
                 if (visible)
                 {
                     RegisterTimezoneReceiver();
-                    _time.Clear(TimeZone.Default.ID);
+                    _time.Clear(Java.Util.TimeZone.Default.ID);
                     _time.SetToNow();
                 }
                 else
@@ -351,11 +322,13 @@ namespace WatchFace
                 {
                     if (timeZoneReceiver == null)
                     {
-                        timeZoneReceiver = new TimeZoneReceiver();
-                        timeZoneReceiver.Receive = intent =>
+                        timeZoneReceiver = new TimeZoneReceiver
                         {
-                            _time.Clear(intent.GetStringExtra("time-zone"));
-                            _time.SetToNow();
+                            Receive = intent =>
+                            {
+                                _time.Clear(intent.GetStringExtra("time-zone"));
+                                _time.SetToNow();
+                            }
                         };
                     }
                     registeredTimezoneReceiver = true;

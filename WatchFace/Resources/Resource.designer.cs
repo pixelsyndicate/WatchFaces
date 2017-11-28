@@ -782,9 +782,6 @@ namespace WatchFace
 			// aapt resource value: 0x7f02001d
 			public const int preference_wrapped_icon = 2130837533;
 			
-			// aapt resource value: 0x7f02001e
-			public const int xamarin_logo = 2130837534;
-			
 			static Drawable()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();

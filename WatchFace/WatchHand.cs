@@ -7,9 +7,9 @@ namespace WatchFace
     public class WatchHand
     {
         private Time _time;
-        private int _centerX;
-        private int _centerY;
-        private int _length;
+        private readonly int _centerX;
+        private readonly int _centerY;
+        private readonly int _length;
         private float _rotation;
         public WatchHand(HandType type, float centerX, float centerY, float length)
         {
@@ -17,7 +17,7 @@ namespace WatchFace
             _centerX = (int)centerX;
             _centerY = (int)centerY;
             _length = (int)length;
-            if (name == string.Empty)
+            if (string.IsNullOrEmpty(name))
                 name = type.ToString();
         }
 
@@ -25,7 +25,7 @@ namespace WatchFace
         private HandType handType { get; }
         public Paint paint { get; set; } = new Paint { AntiAlias = true, StrokeCap = Paint.Cap.Round };
         public Coords startCoords { get; set; }
-  
+
 
         private Coords stopCoords { get; set; }
 
@@ -47,7 +47,6 @@ namespace WatchFace
 
         private float GetRotation(Time time)
         {
-            var toReturn = 0.0f;
             _time = time;
             var sec = _time.Second;
             var min = _time.Minute;
@@ -56,25 +55,28 @@ namespace WatchFace
             switch (handType)
             {
                 case HandType.SECONDS:
-                    toReturn = sec / 30f * (float)Math.PI;
+                    return sec / 30f * (float)Math.PI;
                     break;
                 case HandType.MINUTES:
-                    toReturn = min / 30f * (float)Math.PI;
+                    return min / 30f * (float)Math.PI;
                     break;
                 case HandType.HOURS:
-                    toReturn = (hr + min / 60f) / 6f * (float)Math.PI;
+                    return (hr + min / 60f) / 6f * (float)Math.PI;
                     break;
                 case HandType.MILLISECONDS:
-                    toReturn = ms / 100f * (float)Math.PI;
+                    return ms / 100f * (float)Math.PI;
+                    break;
+                default:
+                    return ms / 100f * (float)Math.PI;
                     break;
             }
-            return toReturn;
         }
 
         public void DrawHand(Canvas canvas, Time time)
         {
-            _time = time;
-            _rotation = GetRotation(_time);
+            var thisName = name;
+            var checkStopCoords = stopCoords;
+            _rotation = GetRotation(time);
             var coords = new StartStopCoords(_centerX, _centerY, _rotation, _length);
             startCoords = coords.sPos;
             stopCoords = coords.ePos;

@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="HandType.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="StartStopCoords.cs" />
     <Compile Include="WatchFaceFactory.cs" />
     <Compile Include="MyWatchFaceService.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

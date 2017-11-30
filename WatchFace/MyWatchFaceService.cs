@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -10,8 +9,10 @@ using Android.Support.Wearable.Watchface;
 using Android.Text.Format;
 using Android.Util;
 using Android.Views;
+using Java.Util;
 using Java.Util.Concurrent;
 using WatchFaceTools;
+using Timer = System.Threading.Timer;
 using TimeZone = Java.Util.TimeZone;
 
 namespace WatchFace
@@ -46,6 +47,7 @@ namespace WatchFace
             private readonly CanvasWatchFaceService _owner;
 
             // The current time:
+            private static Calendar _calendar;
             private Time _time;
 
             // Bitmaps for drawing the watch face background:

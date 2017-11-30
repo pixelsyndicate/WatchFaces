@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{38800B40-5660-4CF8-BD7B-7BD00EB06E1D}</ProjectGuid>
+    <ProjectGuid>{EA2F1DB5-B943-47C5-AD6D-9C6F5B6B6705}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>WatchFace</RootNamespace>
     <AssemblyName>WatchFace</AssemblyName>
@@ -84,7 +84,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HandType.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="StartStopCoords.cs" />
     <Compile Include="WatchFaceFactory.cs" />
@@ -92,8 +91,6 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeZoneReceiver.cs" />
-    <Compile Include="WatchHand.cs" />
-    <Compile Include="WatchTicks.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
@@ -132,6 +129,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\bullet_hole.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WatchFaceTools\WatchFaceTools.csproj">
+      <Project>{75931b11-c603-46d7-9239-7b6bedec3247}</Project>
+      <Name>WatchFaceTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

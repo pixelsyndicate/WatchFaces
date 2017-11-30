@@ -1,12 +1,10 @@
 ﻿using System;
 using Android.Graphics;
 using Android.Text.Format;
-using Java.Lang;
-using WatchFaceTools;
 using Exception = System.Exception;
 using Math = System.Math;
 
-namespace WatchFace
+namespace WatchFaceTools
 {
     public class WatchHand
     {

@@ -11,14 +11,15 @@ using Android.Text.Format;
 using Android.Util;
 using Android.Views;
 using Java.Util.Concurrent;
+using WatchFaceTools;
 using TimeZone = Java.Util.TimeZone;
 
 namespace WatchFace
 {
-    // MyWatchFaceService implements only one method, OnCreateEngine, 
-    // and it defines a nested class that is derived from
-    // CanvasWatchFaceService.Engine.
-
+    /// <summary>
+    /// MyWatchFaceService implements only one method, OnCreateEngine, 
+    /// and it defines a nested class that is derived from CanvasWatchFaceService.Engine.
+    /// </summary>
     public class MyWatchFaceService : CanvasWatchFaceService
     {
         // Used for logging:
@@ -102,13 +103,14 @@ namespace WatchFace
 
                 // Configure the background image:
                 var backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background);
+                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background_AOD);
 
-                backgroundBitmap = (backgroundDrawable as BitmapDrawable).Bitmap;
+                backgroundBitmap = (backgroundDrawable as BitmapDrawable)?.Bitmap;
 
                 // configure a foreground image for use later (bullet hole)
                 var foregroundDrawable =
                     Application.Context.Resources.GetDrawable(Resource.Drawable.bullet_hole);
-                hubBitmap = (foregroundDrawable as BitmapDrawable).Bitmap;
+                hubBitmap = (foregroundDrawable as BitmapDrawable)?.Bitmap;
 
                 // Initialize paint objects for drawing the clock hands and tick marks:
 

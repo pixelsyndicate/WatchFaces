@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Android.Graphics;
-using WatchFaceTools;
 
-namespace WatchFace
+namespace WatchFaceTools
 {
     public class WatchTicks
     {

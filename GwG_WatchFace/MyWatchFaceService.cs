@@ -11,14 +11,16 @@ using Android.Text.Format;
 using Android.Util;
 using Android.Views;
 using Java.Util.Concurrent;
+using WatchFaceTools;
 using TimeZone = Java.Util.TimeZone;
 
 namespace WatchFace
 {
-    // MyWatchFaceService implements only one method, OnCreateEngine, 
-    // and it defines a nested class that is derived from
-    // CanvasWatchFaceService.Engine.
 
+    /// <summary>
+    ///     MyWatchFaceService implements only one method, OnCreateEngine,  
+    /// and it defines a nested class that is derived from CanvasWatchFaceService.Engine.
+    /// </summary>
     public class MyWatchFaceService : CanvasWatchFaceService
     {
         // Used for logging:
@@ -49,8 +51,9 @@ namespace WatchFace
 
             // Bitmaps for drawing the watch face background:
             private Bitmap backgroundBitmap;
-
+            private Bitmap aodBackgroundBitmap;
             private Bitmap backgroundScaledBitmap;
+            private Bitmap aodBackgroundScaledBitmap;
 
             // For painting the hands of the watch:
             private Paint hourPaint;
@@ -102,8 +105,10 @@ namespace WatchFace
 
                 // Configure the background image:
                 var backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background);
+                backgroundBitmap = (backgroundDrawable as BitmapDrawable)?.Bitmap;
 
-                backgroundBitmap = (backgroundDrawable as BitmapDrawable).Bitmap;
+                var aodBgDrawable = Android.App.Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background_AOD);
+                aodBackgroundBitmap = (aodBgDrawable as BitmapDrawable)?.Bitmap;
 
                 // configure a foreground image for use later (bullet hole)
                 var foregroundDrawable =
@@ -230,6 +235,18 @@ namespace WatchFace
                     var mticks = new WatchTicks(centerX, centerY, 10, 3, -10) { TickPaint = mTickPaint };
                     mticks.DrawTicks(canvas, 60, 5);
                 }
+                else
+                {
+                    // AOD
+                    if (aodBackgroundScaledBitmap == null ||
+                        aodBackgroundScaledBitmap.Width != width || aodBackgroundScaledBitmap.Height != height)
+                        aodBackgroundScaledBitmap = Bitmap.CreateScaledBitmap(aodBackgroundBitmap, width, height, true /* filter */);
+
+                    // full-alpha
+                   // canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, null);
+                    // half-alpha
+                    canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, new Paint(){Alpha = 65});
+                }
 
 
 
@@ -245,7 +262,7 @@ namespace WatchFace
                 var tf = Typeface.Create("Arial", TypefaceStyle.Bold);
                 textPaint.SetTypeface(tf);
                 textPaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(130, 50, 50, 50));
-                var dl = new Coords(centerX + 20, centerY + centerY / 5);
+                var dl = new Coords(centerX*1.10f, centerY*1.25f);
                 canvas.DrawText(str, dl.X, dl.Y, textPaint);
 
 
@@ -259,6 +276,9 @@ namespace WatchFace
                     hubScaledBitmap = Bitmap.CreateScaledBitmap(hubBitmap, bhW, bhH, true /* filter */);
                 canvas.DrawBitmap(hubScaledBitmap, bhX, bhY, null);
 
+
+                var minLength = centerX - 40;
+                var hrLength = centerX - 80;
                 if (ShouldTimerBeRunning())
                 {
                     // Draw the second hand only in interactive mode:
@@ -276,11 +296,7 @@ namespace WatchFace
                             milPad)
                     { paint = secondPaint };
                     milHand.DrawHand(canvas, _time);
-                }
 
-                var minLength = centerX - 40; var hrLength = centerX - 80;
-                if (ShouldTimerBeRunning())
-                {
                     // Draw the minute hand:
 
                     minHand = new WatchHand(HandType.MINUTES, HandStyle.CENTRIC, centerX, centerY, (int)minLength) { paint = minutePaint };
@@ -318,9 +334,11 @@ namespace WatchFace
 
             }
 
-            // Called whenever the watch face is becoming visible or hidden. 
-            // Note that you must call base.OnVisibilityChanged first:
-
+            /// <summary>
+            /// Called whenever the watch face is becoming visible or hidden.
+            /// Note that you must call base.OnVisibilityChanged first:
+            /// </summary>
+            /// <param name="visible"></param>
             public override void OnVisibilityChanged(bool visible)
             {
                 base.OnVisibilityChanged(visible);
@@ -344,15 +362,16 @@ namespace WatchFace
                 }
             }
 
-            // Run the timer only when visible and in interactive mode:
+            /// Run the timer only when visible and in interactive mode:
             private bool ShouldTimerBeRunning()
             {
                 return IsVisible && !IsInAmbientMode;
             }
 
-            // Registers the time zone broadcast receiver (defined at the end of 
-            // this file) to handle time zone change events:
 
+            /// <summary>
+            /// Registers the time zone broadcast receiver (defined at the end of this file) to handle time zone change events:
+            /// </summary>
             private void RegisterTimezoneReceiver()
             {
                 if (registeredTimezoneReceiver)
@@ -375,7 +394,10 @@ namespace WatchFace
                 }
             }
 
-            // Unregisters the timezone Broadcast receiver:
+            // 
+            /// <summary>
+            /// Unregisters the timezone Broadcast receiver:
+            /// </summary>
             private void UnregisterTimezoneReceiver()
             {
                 if (!registeredTimezoneReceiver)

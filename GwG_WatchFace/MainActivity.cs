@@ -1,16 +1,8 @@
-﻿using System;
-
-using Android.App;
-using Android.Content;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
+﻿using Android.App;
 using Android.OS;
-using Android.Support.Wearable.Views;
 using Android.Support.V4.App;
-using Android.Support.V4.View;
-using Java.Interop;
-using Android.Views.Animations;
+using Android.Support.Wearable.Views;
+using Android.Widget;
 
 namespace WatchFace
 {
@@ -26,27 +18,27 @@ namespace WatchFace
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            //var v = FindViewById<WatchViewStub>(Resource.Id.watch_view_stub);
-            //v.LayoutInflated += delegate
-            //{
+            var v = FindViewById<WatchViewStub>(Resource.Id.watch_view_stub);
+            v.LayoutInflated += delegate
+            {
 
-            //    // Get our button from the layout resource,
-            //    // and attach an event to it
-            //    Button button = FindViewById<Button>(Resource.Id.myButton);
+                // Get our button from the layout resource,
+                // and attach an event to it
+                Button button = FindViewById<Button>(Resource.Id.myButton);
+                button.Text = "Install Completed. Click to accept.";
+                button.Click += delegate
+                {
+                    var notification = new NotificationCompat.Builder(this)
+                        .SetContentTitle("User Acceptance")
+                        .SetContentText("Thank you. Enjoy the Watch Face!")
+                        .SetSmallIcon(Android.Resource.Drawable.StatNotifyVoicemail)
+                        .SetGroup("group_key_demo").Build();
 
-            //    button.Click += delegate
-            //    {
-            //        var notification = new NotificationCompat.Builder(this)
-            //            .SetContentTitle("Button tapped")
-            //            .SetContentText("Button tapped " + count++ + " times!")
-            //            .SetSmallIcon(Android.Resource.Drawable.StatNotifyVoicemail)
-            //            .SetGroup("group_key_demo").Build();
-
-            //        var manager = NotificationManagerCompat.From(this);
-            //        manager.Notify(1, notification);
-            //        button.Text = "Check Notification!";
-            //    };
-            //};
+                    var manager = NotificationManagerCompat.From(this);
+                    manager.Notify(1, notification);
+                    button.Text = "Swipe to dismiss";
+                };
+            };
         }
     }
 }

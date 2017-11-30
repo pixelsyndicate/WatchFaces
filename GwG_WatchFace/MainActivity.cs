@@ -1,4 +1,6 @@
-﻿using Android.App;
+﻿
+using Android;
+using Android.App;
 using Android.OS;
 using Android.Support.V4.App;
 using Android.Support.Wearable.Views;
@@ -14,7 +16,7 @@ namespace WatchFace
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-
+            var main = Resource.Layout.Main;
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 

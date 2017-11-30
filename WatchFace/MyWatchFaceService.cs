@@ -50,8 +50,10 @@ namespace WatchFace
 
             // Bitmaps for drawing the watch face background:
             private Bitmap backgroundBitmap;
-
             private Bitmap backgroundScaledBitmap;
+
+            private Bitmap aodBackgroundBitmap;
+            private Bitmap aodBackgroundScaledBitmap;
 
             // For painting the hands of the watch:
             private Paint hourPaint;
@@ -103,9 +105,10 @@ namespace WatchFace
 
                 // Configure the background image:
                 var backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background);
-                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background_AOD);
-
                 backgroundBitmap = (backgroundDrawable as BitmapDrawable)?.Bitmap;
+
+                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_aod);
+                aodBackgroundBitmap = (AOD_backgroundDrawable as BitmapDrawable).Bitmap;
 
                 // configure a foreground image for use later (bullet hole)
                 var foregroundDrawable =
@@ -232,6 +235,17 @@ namespace WatchFace
                     var mticks = new WatchTicks(centerX, centerY, 10, 3, -10) { TickPaint = mTickPaint };
                     mticks.DrawTicks(canvas, 60, 5);
                 }
+                else
+                {
+                    if (aodBackgroundScaledBitmap == null ||
+                        aodBackgroundScaledBitmap.Width != width || aodBackgroundScaledBitmap.Height != height)
+                        aodBackgroundScaledBitmap =
+                            Bitmap.CreateScaledBitmap(aodBackgroundBitmap, width, height, true /* filter */);
+                    // full-alpha
+                    // canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, null);
+                    // half-alpha
+                    canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, new Paint() { Alpha = 65 });
+                }
 
 
 
@@ -247,14 +261,15 @@ namespace WatchFace
                 var tf = Typeface.Create("Arial", TypefaceStyle.Bold);
                 textPaint.SetTypeface(tf);
                 textPaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(130, 50, 50, 50));
-                var dl = new Coords(centerX + 20, centerY + centerY / 5);
+                var dl = new Coords(centerX*1.05f, centerY*1.25f);
                 canvas.DrawText(str, dl.X, dl.Y, textPaint);
 
 
                 // draw a central hub (bullet hole?)
-
+                // size this as quarter of the face width
                 var bhW = (int)(width / 4.0f);
                 var bhH = (int)(height / 4.0f);
+                // center in the half-way point of the bitmap
                 var bhX = centerX - bhW / 2.0f;
                 var bhY = centerY - bhH / 2.0f;
                 if (hubScaledBitmap == null)

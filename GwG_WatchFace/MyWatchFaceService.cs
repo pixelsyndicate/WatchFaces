@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Android;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -51,9 +52,11 @@ namespace WatchFace
 
             // Bitmaps for drawing the watch face background:
             private Bitmap backgroundBitmap;
-            private Bitmap aodBackgroundBitmap;
             private Bitmap backgroundScaledBitmap;
+
+            private Bitmap aodBackgroundBitmap;
             private Bitmap aodBackgroundScaledBitmap;
+
 
             // For painting the hands of the watch:
             private Paint hourPaint;
@@ -63,7 +66,6 @@ namespace WatchFace
 
             // Bitmaps for drawing on the foreground of the watch face
             private Bitmap hubBitmap;
-
             private Bitmap hubScaledBitmap;
 
             // Whether the display supports fewer bits for each color in ambient mode. 
@@ -77,7 +79,6 @@ namespace WatchFace
 
             private WatchHand secHand, minHand, hrHand, milHand;
             private Paint secondPaint;
-
             private Timer timerSeconds;
 
             // Broadcast receiver for handling time zone changes:
@@ -107,33 +108,29 @@ namespace WatchFace
                 var backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background);
                 backgroundBitmap = (backgroundDrawable as BitmapDrawable)?.Bitmap;
 
-                var aodBgDrawable = Android.App.Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_background_AOD);
-                aodBackgroundBitmap = (aodBgDrawable as BitmapDrawable)?.Bitmap;
+                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.gwg_aod);
+                aodBackgroundBitmap = (AOD_backgroundDrawable as BitmapDrawable).Bitmap;
 
                 // configure a foreground image for use later (bullet hole)
                 var foregroundDrawable =
                     Application.Context.Resources.GetDrawable(Resource.Drawable.bullet_hole);
-                hubBitmap = (foregroundDrawable as BitmapDrawable).Bitmap;
+                hubBitmap = (foregroundDrawable as BitmapDrawable)?.Bitmap;
 
                 // Initialize paint objects for drawing the clock hands and tick marks:
 
-                // Hour hand:   
-                hourPaint = WatchFaceFactory.GetHourHand(Color.White, true);
-
-                // Minute hand:
-                minutePaint = WatchFaceFactory.GetMinuteHand(Color.White, true);
-
-                // Seconds hand:
-                secondPaint = WatchFaceFactory.GetSecondHand(Color.Red, true);
+                // Hand paints:   
+                hourPaint = WatchFaceFactory.GetHourHand(Color.White);
+                minutePaint = WatchFaceFactory.GetMinuteHand(Color.White);
+                secondPaint = WatchFaceFactory.GetSecondHand(Color.Red);
 
                 // Ticks:
-                hTickPaint = new Paint { AntiAlias = true };
+                hTickPaint = new Paint { AntiAlias = true, StrokeWidth = 3.0f };
                 hTickPaint.SetARGB(255, 210, 0, 0);
-                hTickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
+                hTickPaint.SetShadowLayer(1.1f, .5f, .5f, Color.Argb(178, 50, 50, 50));
 
-                mTickPaint = new Paint { AntiAlias = true };
+                mTickPaint = new Paint { AntiAlias = true, StrokeWidth = 1.5f };
                 mTickPaint.SetARGB(255, 159, 191, 255);
-                mTickPaint.SetShadowLayer(1.1f, 2f, 2f, Color.Argb(178, 50, 50, 50));
+                mTickPaint.SetShadowLayer(1.1f, .5f, .5f, Color.Argb(178, 50, 50, 50));
 
                 // Instantiate the time object:
                 _time = new Time();
@@ -198,8 +195,11 @@ namespace WatchFace
                 Invalidate();
             }
 
-            // Called to draw the watch face:
-
+            /// <summary>
+            /// Called to draw the watch face
+            /// </summary>
+            /// <param name="canvas"></param>
+            /// <param name="bounds"></param>
             public override void OnDraw(Canvas canvas, Rect bounds)
             {
                 // Get the current time:
@@ -213,12 +213,10 @@ namespace WatchFace
                 var centerX = width / 2.0f;
                 var centerY = height / 2.0f;
 
-
-                // Draw the background, scaled to fit:
-
-
+                // set a default background color
                 canvas.DrawColor(Color.Black);
 
+                // draw the background (scaled to fit) along with Ticks (if not in ambient mode)
                 if (ShouldTimerBeRunning())
                 {
                     if (backgroundScaledBitmap == null ||
@@ -226,43 +224,47 @@ namespace WatchFace
                         backgroundScaledBitmap =
                             Bitmap.CreateScaledBitmap(backgroundBitmap, width, height, true /* filter */);
                     canvas.DrawBitmap(backgroundScaledBitmap, 0, 0, null);
-
-                    // Draw the hour ticks:
-                    var hticks = new WatchTicks(centerX, centerY, 20, 5, -1) { TickPaint = hTickPaint };
-                    hticks.DrawTicks(canvas, 12);
-
-                    // Draw the minute ticks:
-                    var mticks = new WatchTicks(centerX, centerY, 10, 3, -10) { TickPaint = mTickPaint };
-                    mticks.DrawTicks(canvas, 60, 5);
                 }
                 else
                 {
                     // AOD
                     if (aodBackgroundScaledBitmap == null ||
                         aodBackgroundScaledBitmap.Width != width || aodBackgroundScaledBitmap.Height != height)
-                        aodBackgroundScaledBitmap = Bitmap.CreateScaledBitmap(aodBackgroundBitmap, width, height, true /* filter */);
-
+                        aodBackgroundScaledBitmap =
+                            Bitmap.CreateScaledBitmap(aodBackgroundBitmap, width, height, true /* filter */);
                     // full-alpha
-                   // canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, null);
+                    // canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, null);
                     // half-alpha
-                    canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, new Paint(){Alpha = 65});
+                    canvas.DrawBitmap(aodBackgroundScaledBitmap, 0, 0, new Paint() { Alpha = 65 });
                 }
 
 
+                // draw the face ticks (if not in ambient mode)
+                if (ShouldTimerBeRunning())
+                {
+                    // Draw the hour ticks:
+                    var hticks = new WatchTicks(centerX, centerY, 20, 5, -1) { TickPaint = hTickPaint };
+                    hticks.DrawTicks(canvas, 12); // draw 12 of them.
 
-                // draw something with the date
+                    // Draw the minute ticks:
+                    var mticks = new WatchTicks(centerX, centerY, 10, 3, -10) { TickPaint = mTickPaint };
+                    mticks.DrawTicks(canvas, 60, 5); // draw 60 of them, but skip every 5th one [60/12 = 5]
+                }
+                
+
+                // draw something with the date (change the color based on AOD)
                 var str = DateTime.Now.ToString("ddd, dd MMM");
                 var textPaint = new Paint
                 {
                     Alpha = 255,
                     AntiAlias = true,
-                    Color = ShouldTimerBeRunning() ? Color.Black : Color.Silver,
-                    TextSize = (float)centerY / 10
+                    Color = ShouldTimerBeRunning() ? Color.Black : Color.Silver, // (change the color based on AOD)
+                    TextSize = centerY / 10.0f
                 };
                 var tf = Typeface.Create("Arial", TypefaceStyle.Bold);
                 textPaint.SetTypeface(tf);
                 textPaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(130, 50, 50, 50));
-                var dl = new Coords(centerX*1.10f, centerY*1.25f);
+                var dl = new Coords(centerX * 1.10f, centerY * 1.25f);
                 canvas.DrawText(str, dl.X, dl.Y, textPaint);
 
 

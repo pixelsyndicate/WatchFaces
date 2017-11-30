@@ -726,10 +726,10 @@ namespace WatchFace
 			public const int generic_confirmation_animation = 2130837514;
 			
 			// aapt resource value: 0x7f02000b
-			public const int gwg_background = 2130837515;
+			public const int gwg_aod = 2130837515;
 			
 			// aapt resource value: 0x7f02000c
-			public const int gwg_background_AOD = 2130837516;
+			public const int gwg_background = 2130837516;
 			
 			// aapt resource value: 0x7f02000d
 			public const int gwg_logo = 2130837517;

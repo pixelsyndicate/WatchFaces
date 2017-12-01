@@ -705,76 +705,76 @@ namespace WatchFace
 			public const int action_item_icon_background = 2130837507;
 			
 			// aapt resource value: 0x7f020004
-			public const int bullet_hole = 2130837508;
+			public const int BSN_Chevron_Black = 2130837508;
 			
 			// aapt resource value: 0x7f020005
-			public const int card_background = 2130837509;
+			public const int BSN_Chevron_Red = 2130837509;
 			
 			// aapt resource value: 0x7f020006
-			public const int card_frame = 2130837510;
+			public const int BSN_Inline_Red_White = 2130837510;
 			
 			// aapt resource value: 0x7f020007
-			public const int card_frame_pressed = 2130837511;
+			public const int BSNSports_Inline_RedChevron_WhiteText = 2130837511;
 			
 			// aapt resource value: 0x7f020008
-			public const int close_button = 2130837512;
+			public const int card_background = 2130837512;
 			
 			// aapt resource value: 0x7f020009
-			public const int generic_confirmation = 2130837513;
+			public const int card_frame = 2130837513;
 			
 			// aapt resource value: 0x7f02000a
-			public const int generic_confirmation_animation = 2130837514;
+			public const int card_frame_pressed = 2130837514;
 			
 			// aapt resource value: 0x7f02000b
-			public const int gwg_aod = 2130837515;
+			public const int close_button = 2130837515;
 			
 			// aapt resource value: 0x7f02000c
-			public const int gwg_background = 2130837516;
+			public const int generic_confirmation = 2130837516;
 			
 			// aapt resource value: 0x7f02000d
-			public const int gwg_logo = 2130837517;
+			public const int generic_confirmation_animation = 2130837517;
 			
 			// aapt resource value: 0x7f02000e
-			public const int gwg_preview = 2130837518;
+			public const int ic_cc_checkmark = 2130837518;
 			
 			// aapt resource value: 0x7f02000f
-			public const int ic_cc_checkmark = 2130837519;
+			public const int ic_cc_clear = 2130837519;
 			
 			// aapt resource value: 0x7f020010
-			public const int ic_cc_clear = 2130837520;
+			public const int ic_cc_settings_button_bottom = 2130837520;
 			
 			// aapt resource value: 0x7f020011
-			public const int ic_cc_settings_button_bottom = 2130837521;
+			public const int ic_cc_settings_button_center = 2130837521;
 			
 			// aapt resource value: 0x7f020012
-			public const int ic_cc_settings_button_center = 2130837522;
+			public const int ic_cc_settings_button_e = 2130837522;
 			
 			// aapt resource value: 0x7f020013
-			public const int ic_cc_settings_button_e = 2130837523;
+			public const int ic_cc_settings_button_top = 2130837523;
 			
 			// aapt resource value: 0x7f020014
-			public const int ic_cc_settings_button_top = 2130837524;
+			public const int ic_expand_less_white_22 = 2130837524;
 			
 			// aapt resource value: 0x7f020015
-			public const int ic_expand_less_white_22 = 2130837525;
+			public const int ic_expand_more_white_22 = 2130837525;
 			
 			// aapt resource value: 0x7f020016
-			public const int ic_expand_more_white_22 = 2130837526;
+			public const int ic_full_cancel = 2130837526;
 			
 			// aapt resource value: 0x7f020017
-			public const int ic_full_cancel = 2130837527;
+			public const int ic_full_sad = 2130837527;
 			
 			// aapt resource value: 0x7f020018
-			public const int ic_full_sad = 2130837528;
+			public const int ic_more_horiz_24dp_wht = 2130837528;
 			
 			// aapt resource value: 0x7f020019
-			public const int ic_more_horiz_24dp_wht = 2130837529;
+			public const int ic_more_vert_24dp_wht = 2130837529;
 			
 			// aapt resource value: 0x7f02001a
-			public const int ic_more_vert_24dp_wht = 2130837530;
+			public const int Icon = 2130837530;
 			
 			// aapt resource value: 0x7f02001b
-			public const int Icon = 2130837531;
+			public const int mind_the_gap = 2130837531;
 			
 			// aapt resource value: 0x7f02001c
 			public const int open_on_phone = 2130837532;
@@ -784,6 +784,12 @@ namespace WatchFace
 			
 			// aapt resource value: 0x7f02001e
 			public const int preference_wrapped_icon = 2130837534;
+			
+			// aapt resource value: 0x7f02001f
+			public const int Underground = 2130837535;
+			
+			// aapt resource value: 0x7f020020
+			public const int watchface_preview = 2130837536;
 			
 			static Drawable()
 			{

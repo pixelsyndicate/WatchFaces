@@ -6,11 +6,11 @@ using Android.App;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WatchFace")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Wearable WatchFace")]
+[assembly: AssemblyDescription("Android Wear Watchface by The Pixel Syndicate")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The Pixel Syndicate")]
-[assembly: AssemblyProduct("WatchFace")]
+[assembly: AssemblyProduct("PixelSyndicate Wearable WatchFace")]
 [assembly: AssemblyCopyright("Copyright © Pixel Syndicate 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

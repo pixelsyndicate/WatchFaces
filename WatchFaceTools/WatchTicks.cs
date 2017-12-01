@@ -24,19 +24,19 @@ namespace WatchFaceTools
         {
             _centerX = centerX;
             _centerY = centerY;
-            Length = length;
-            Padding = padding;
-            Width = width;
-            StartingRadius = centerX + padding - length;
-            EndingRadius = centerX + padding;
-            TickPaint = new Paint {StrokeWidth = width, AntiAlias = true};
+            _length = length;
+            _padding = padding;
+            _width = width;
+            StartingRadius = _centerX + _padding - _length;
+            EndingRadius = _centerX + _padding;
+            TickPaint = new Paint {StrokeWidth = _width, AntiAlias = true};
         }
         
-        private int Length { get; }
+        private int _length { get; }
 
-        private int Width { get; }
+        private int _width { get; }
 
-        private int Padding { get; }
+        private int _padding { get; }
 
         private float StartingRadius { get; }
 

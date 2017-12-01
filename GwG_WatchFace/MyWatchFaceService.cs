@@ -405,9 +405,10 @@ namespace WatchFace
                         {
                             Receive = intent =>
                             {
-                                var dt = DateTime.Now;
+
                                 _calendar.Clear(CalendarField.ZoneOffset);
                                 _calendar.TimeZone = TimeZone.Default;
+                                _calendar = Calendar.GetInstance(Locale.Default);
                             }
                         };
                     registeredTimezoneReceiver = true;

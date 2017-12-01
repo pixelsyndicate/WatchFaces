@@ -7,7 +7,7 @@
 	<application android:label="WatchFace" android:theme="@android:style/Theme.DeviceDefault" android:icon="@drawable/Icon">
 		<service android:name="watchface.MyWatchFaceService" android:label="GwG Watchface" android:allowEmbedded="true" android:taskAffinity="" android:permission="android.permission.BIND_WALLPAPER">
 			<meta-data android:name="android.service.wallpaper" android:resource="@xml/watch_face" />
-			<meta-data android:name="com.google.android.wearable.watchface.preview" android:resource="@drawable/gwg_preview" />
+			<meta-data android:name="com.google.android.wearable.watchface.preview" android:resource="@drawable/watchface_preview" />
 			<intent-filter>
 				<action android:name="android.service.wallpaper.WallpaperService" />
 				<category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />

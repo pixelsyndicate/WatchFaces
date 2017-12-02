@@ -7,27 +7,30 @@ using Math = System.Math;
 
 namespace WatchFaceTools
 {
-    public class WatchHand
+    public class WatchHand : ScreenElement
     {
-        private Date _time;
         private readonly int _centerX;
         private readonly int _centerY;
-        private readonly int _length;
-        private float _rotation;
-        private int _padding;
-        private int _width;
         private readonly float _startingRadius = 0.0f;
         private readonly float _endingRadius = 0.0f;
+        private HandType handType { get; }
+        private HandStyle HandStyle { get; set; }
+        protected internal override float Width
+        {
+            get => Paint.StrokeWidth <= 0.0f ? 1f : Paint.StrokeWidth;
+            set => Paint.StrokeWidth = value;
+        }
 
         public WatchHand(HandType type, HandStyle style, float centerX, float centerY, int length)
         {
+            Paint = new Paint {AntiAlias = true, StrokeCap = Paint.Cap.Round};
             handType = type;
             HandStyle = style;
-            _centerX = (int)centerX;
-            _centerY = (int)centerY;
-            _length = (int)length;
-            if (string.IsNullOrEmpty(name))
-                name = type.ToString();
+            _centerX = (int) centerX;
+            _centerY = (int) centerY;
+            Length = (int) length;
+            if (string.IsNullOrEmpty(Name))
+                Name = type.ToString();
             _isStartingAtCenter = style == HandStyle.CENTRIC;
             _startingRadius = centerX;
             _endingRadius = centerX;
@@ -35,44 +38,21 @@ namespace WatchFaceTools
 
         public WatchHand(HandType type, HandStyle style, float centerX, float centerY, int length, int padding)
         {
+            Paint = new Paint {AntiAlias = true, StrokeCap = Paint.Cap.Round};
             handType = type;
             HandStyle = style;
-            _centerX = (int)centerX;
-            _centerY = (int)centerY;
-            _length = (int)length;
-            if (string.IsNullOrEmpty(name))
-                name = type.ToString();
+            _centerX = (int) centerX;
+            _centerY = (int) centerY;
+            Length = (int) length;
+            if (string.IsNullOrEmpty(Name))
+                Name = type.ToString();
             _isStartingAtCenter = style == HandStyle.CENTRIC;
-            _padding = padding;
+            Padding = padding;
             _startingRadius = centerX + padding - length;
             _endingRadius = centerX + padding;
         }
 
-
-        private string name { get; set; }
-        private HandType handType { get; }
-        private HandStyle HandStyle { get; set; }
-        public Paint paint { get; set; } = new Paint { AntiAlias = true, StrokeCap = Paint.Cap.Round };
-        private Coords startCoords { get; set; }
-
-
-        private Coords stopCoords { get; set; }
-
-        public float width
-        {
-            get => paint.StrokeWidth <= 0.0f ? 1f : paint.StrokeWidth;
-            set => paint.StrokeWidth = value;
-        }
-
-        public void SetAlpha(int a)
-        {
-            paint.Alpha = a;
-        }
-
-        public void SetColor(Color c)
-        {
-            paint.Color = c;
-        }
+        private readonly bool _isStartingAtCenter;
 
         /// <summary>
         /// Returns a float value for the rotation
@@ -85,17 +65,17 @@ namespace WatchFaceTools
             var min = calendar.Get(CalendarField.Minute);
             var hr = calendar.Get(CalendarField.Hour);
             var ms = calendar.Get(CalendarField.Millisecond);
-            
+
             switch (handType)
             {
                 case HandType.MILLISECONDS:
-                    return ms / 500f * (float)Math.PI;
+                    return ms / 500f * (float) Math.PI;
                 case HandType.SECONDS:
-                    return sec / 30f * (float)Math.PI;
+                    return sec / 30f * (float) Math.PI;
                 case HandType.MINUTES:
-                    return min / 30f * (float)Math.PI;
+                    return min / 30f * (float) Math.PI;
                 case HandType.HOURS:
-                    return (hr + min / 60f) / 6f * (float)Math.PI;
+                    return (hr + min / 60f) / 6f * (float) Math.PI;
                 default:
                     throw new Exception("WatchHand not valid.");
             }
@@ -103,49 +83,43 @@ namespace WatchFaceTools
 
         public void DrawHand(Canvas canvas, Calendar calendar)
         {
-            _rotation = GetRotation(calendar);
-
+            Rotation = GetRotation(calendar);
+            StartStopCoords coords;
             if (!_isStartingAtCenter)
             {
-                var innerX = (float)Math.Sin(_rotation) * _startingRadius;
-                var innerY = (float)-Math.Cos(_rotation) * _startingRadius;
-                var outerX = (float)Math.Sin(_rotation) * _endingRadius;
-                var outerY = (float)-Math.Cos(_rotation) * _endingRadius;
-                startCoords = new Coords { X = _centerX + innerX, Y = _centerY + innerY };
-                stopCoords = new Coords { X = _centerX + outerX, Y = _centerY + outerY };
-                var coords = new StartStopCoords(startCoords, stopCoords);
+                var innerX = (float) Math.Sin(Rotation) * _startingRadius;
+                var innerY = (float) -Math.Cos(Rotation) * _startingRadius;
+                var outerX = (float) Math.Sin(Rotation) * _endingRadius;
+                var outerY = (float) -Math.Cos(Rotation) * _endingRadius;
+                coords = new StartStopCoords(
+                    new Coords {X = _centerX + innerX, Y = _centerY + innerY},
+                    new Coords {X = _centerX + outerX, Y = _centerY + outerY});
             }
             else
             {
-                var coords = new StartStopCoords(_centerX, _centerY, _rotation, _length);
-                startCoords = coords.sPos;
-                stopCoords = coords.ePos;
+                coords = new StartStopCoords(_centerX, _centerY, Rotation, Length);
             }
 
-            canvas.DrawLine(startCoords.X, startCoords.Y, stopCoords.X, stopCoords.Y, paint);
+            canvas.DrawLine(coords.sPos.X, coords.sPos.Y, coords.ePos.X, coords.ePos.Y, Paint);
         }
-
-        private readonly bool _isStartingAtCenter;
 
         private void DrawHandAsTick(Canvas canvas)
         {
-            var innerX = (float)Math.Sin(_rotation) * _startingRadius;
-            var innerY = (float)-Math.Cos(_rotation) * _startingRadius;
-            var outerX = (float)Math.Sin(_rotation) * _endingRadius;
-            var outerY = (float)-Math.Cos(_rotation) * _endingRadius;
+            var innerX = (float) Math.Sin(Rotation) * _startingRadius;
+            var innerY = (float) -Math.Cos(Rotation) * _startingRadius;
+            var outerX = (float) Math.Sin(Rotation) * _endingRadius;
+            var outerY = (float) -Math.Cos(Rotation) * _endingRadius;
+            var coords = new StartStopCoords(
+                new Coords {X = _centerX + innerX, Y = _centerY + innerY},
+                new Coords {X = _centerX + outerX, Y = _centerY + outerY});
 
-            startCoords = new Coords { X = _centerX + innerX, Y = _centerY + innerY };
-            stopCoords = new Coords { X = _centerX + outerX, Y = _centerY + outerY };
-
-            canvas.DrawLine(startCoords.X, startCoords.Y, stopCoords.X, stopCoords.Y, paint);
+            canvas.DrawLine(coords.sPos.X, coords.sPos.Y, coords.ePos.X, coords.ePos.Y, Paint);
         }
 
         private void DrawHandAsLine(Canvas canvas)
         {
-            var coords = new StartStopCoords(_centerX, _centerY, _rotation, _length);
-            startCoords = coords.sPos;
-            stopCoords = coords.ePos;
-            canvas.DrawLine(startCoords.X, startCoords.Y, stopCoords.X, stopCoords.Y, paint);
+            var coords = new StartStopCoords(_centerX, _centerY, Rotation, Length);
+            canvas.DrawLine(coords.sPos.X, coords.sPos.Y, coords.ePos.X, coords.ePos.Y, Paint);
         }
     }
 }

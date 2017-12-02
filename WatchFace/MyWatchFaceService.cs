@@ -47,10 +47,10 @@ namespace WatchFace
             private const int NORMAL_ALPHA = 255;
 
             // for blinking colons
-            private static readonly long NORMAL_UPDATE_RATE_MS = TimeUnit.Milliseconds.ToMillis(50);
-
+            private static readonly long NORMAL_UPDATE_RATE_MS = TimeUnit.Milliseconds.ToMillis(100);
+            
             // for when the screen it muted
-            private static readonly long MUTE_UPDATE_RATE_MS = TimeUnit.Seconds.ToMillis(1);
+            private static readonly long MUTE_UPDATE_RATE_MS = TimeUnit.Seconds.ToMillis(60);
 
             // Reference to the CanvasWatchFaceService that instantiates this engine:
             private readonly CanvasWatchFaceService _owner;
@@ -122,15 +122,18 @@ namespace WatchFace
 
 
                 // Configure the background image:
-                var backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.mind_the_gap);
+                var backgroundDrawable = Application.Context.Resources.GetDrawable(
+                    Resource.Drawable.mind_the_gap);
                 backgroundBitmap = (backgroundDrawable as BitmapDrawable)?.Bitmap;
 
-                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(Resource.Drawable.Underground);
+                var AOD_backgroundDrawable = Application.Context.Resources.GetDrawable(
+                    Resource.Drawable.Underground);
                 aodBackgroundBitmap = (AOD_backgroundDrawable as BitmapDrawable)?.Bitmap;
 
                 // configure a foreground image for use later (bullet hole)
                 var foregroundDrawable =
-                    Application.Context.Resources.GetDrawable(Resource.Drawable.BSN_Chevron_Red);
+                    Application.Context.Resources.GetDrawable(
+                        Resource.Drawable.BSN_Chevron_Red);
                 hubBitmap = (foregroundDrawable as BitmapDrawable)?.Bitmap;
 
                 // Initialize paint objects for drawing the clock hands and tick marks:
@@ -154,14 +157,12 @@ namespace WatchFace
 
                 // Start a timer for redrawing the click face (second hand) every second.
                 // How to stop the timer? It shouldn't run in ambient mode...
-                _updateRate = MUTE_UPDATE_RATE_MS;
+                _updateRate = NORMAL_UPDATE_RATE_MS;
                 timerSeconds = new Timer(state => { Invalidate(); },
                     null, TimeSpan.FromMilliseconds(_updateRate),
                     TimeSpan.FromMilliseconds(_updateRate));
             }
-
-
-
+            
             /// <summary>
             /// Called to draw the watch face
             /// </summary>
@@ -262,7 +263,7 @@ namespace WatchFace
                     // Draw the second hand only in interactive mode:
                     secHand = new WatchHand(HandType.SECONDS, HandStyle.OUTSIDE, centerX, centerY, (int)secLength, -30)
                     {
-                        paint = secondPaint
+                        Paint = secondPaint
                     };
                     secHand.DrawHand(canvas, _calendar);
 
@@ -270,14 +271,14 @@ namespace WatchFace
                     // Draw the minute hand:
                     minHand = new WatchHand(HandType.MINUTES, HandStyle.OUTSIDE, centerX, centerY, (int)minLength, -30)
                     {
-                        paint = minutePaint
+                        Paint = minutePaint
                     };
                     minHand.DrawHand(canvas, _calendar);
 
                     // Draw the hour hand:
                     hrHand = new WatchHand(HandType.HOURS, HandStyle.OUTSIDE, centerX, centerY, (int)hrLength, -30)
                     {
-                        paint = hourPaint
+                        Paint = hourPaint
                     };
                     hrHand.DrawHand(canvas, _calendar);
                 }
@@ -288,7 +289,7 @@ namespace WatchFace
                     outerMinP.StrokeWidth = minutePaint.StrokeWidth + 4;
                     minHand = new WatchHand(HandType.MINUTES, HandStyle.CENTRIC, centerX, centerY, (int)minLength)
                     {
-                        paint = outerMinP
+                       Paint = outerMinP
                     };
                     minHand.DrawHand(canvas, _calendar);
 
@@ -297,7 +298,7 @@ namespace WatchFace
                     outerHourP.StrokeWidth = hourPaint.StrokeWidth + 4;
                     hrHand = new WatchHand(HandType.HOURS, HandStyle.CENTRIC, centerX, centerY, (int)hrLength)
                     {
-                        paint = outerHourP
+                        Paint = outerHourP
                     };
                     hrHand.DrawHand(canvas, _calendar);
 
@@ -305,7 +306,7 @@ namespace WatchFace
                     var innerMinPaint = WatchFaceFactory.GetMinuteHand(Color.Black, false);
                     minHand = new WatchHand(HandType.MINUTES, HandStyle.CENTRIC, centerX, centerY, (int)minLength)
                     {
-                        paint = innerMinPaint
+                        Paint = innerMinPaint
                     };
                     minHand.DrawHand(canvas, _calendar);
 
@@ -313,7 +314,7 @@ namespace WatchFace
                     var innerHourP = WatchFaceFactory.GetHourHand(Color.Black, false);
                     hrHand = new WatchHand(HandType.HOURS, HandStyle.CENTRIC, centerX, centerY, (int)hrLength)
                     {
-                        paint = innerHourP
+                        Paint = innerHourP
                     };
                     hrHand.DrawHand(canvas, _calendar);
                 }

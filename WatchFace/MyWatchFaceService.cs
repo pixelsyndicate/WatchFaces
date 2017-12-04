@@ -233,7 +233,6 @@ namespace WatchFace
                 // textPaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(MUTE_ALPHA, 50, 50, 50));
                 var dl = new Coords(centerX - 40, centerY+40);
                 canvas.DrawText(str, dl.X, dl.Y, textPaint);
-                
 
 
                 // // draw a central hub

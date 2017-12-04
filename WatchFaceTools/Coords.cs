@@ -1,4 +1,6 @@
-﻿namespace WatchFaceTools
+﻿using System;
+
+namespace WatchFaceTools
 {
     public class Coords
     {
@@ -16,4 +18,6 @@
         public float X { get; set; }
         public float Y { get; set; }
     }
+
+    
 }

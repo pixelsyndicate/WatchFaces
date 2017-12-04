@@ -31,7 +31,7 @@ namespace WatchFaceTools
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static float GetSecondHandRotation(Time time)
+        private static float GetSecondHandRotation(Time time)
         {
             return time.Second / 30f * (float)Math.PI;
         }
@@ -42,7 +42,7 @@ namespace WatchFaceTools
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static float GetMinuteHandRotation(Time time)
+        private static float GetMinuteHandRotation(Time time)
         {
             return time.Minute / 30f * (float)Math.PI;
         }
@@ -53,12 +53,12 @@ namespace WatchFaceTools
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static float GetHourHandRotation(Time time)
+        private static float GetHourHandRotation(Time time)
         {
             return (time.Hour + time.Minute / 60f) / 6f * (float)Math.PI;
         }
 
-        public static float GetMillisecondHandRotation(Time time)
+        private static float GetMillisecondHandRotation(Time time)
         {
             SimpleDateFormat formatter = new SimpleDateFormat("SSS");
             var msstr = formatter.Format(time);

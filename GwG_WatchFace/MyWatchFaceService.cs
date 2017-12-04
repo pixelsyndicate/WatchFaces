@@ -24,9 +24,7 @@ namespace WatchFace
     public class MyWatchFaceService : CanvasWatchFaceService
     {
         // Used for logging:
-        private const string Tag = "MyWatchFaceService";
-
-
+        private const string Tag = "AnalogWatchFaceService";
 
         /// <summary>
         ///   Must be implemented to return a new instance of the wallpaper's engine
@@ -104,10 +102,10 @@ namespace WatchFace
                 // notifications to appear as small peek cards that are shown only briefly 
                 // when interruptive. Also disables the system-style UI time from being drawn:
                 SetWatchFaceStyle(new WatchFaceStyle.Builder(_owner)
-                    .SetCardPeekMode(WatchFaceStyle.PeekModeShort) // This method is deprecated. Wear 2.0 doesn't have peeking cards
-                   .SetBackgroundVisibility(WatchFaceStyle.BackgroundVisibilityInterruptive)  // This method is deprecated. Wear 2.0 doesn't have peeking cards
-                    .SetShowSystemUiTime(false) //  this will be removed in a future version of the Wear platform
-                    .SetStatusBarGravity(Resource.Id.bottom | Resource.Id.right)
+                  //  .SetCardPeekMode(WatchFaceStyle.PeekModeShort) // This method is deprecated. Wear 2.0 doesn't have peeking cards
+                   //.SetBackgroundVisibility(WatchFaceStyle.BackgroundVisibilityInterruptive)  // This method is deprecated. Wear 2.0 doesn't have peeking cards
+                   // .SetShowSystemUiTime(false) //  this will be removed in a future version of the Wear platform
+                   // .SetStatusBarGravity(Resource.Id.bottom | Resource.Id.right)
                     .Build());
 
 

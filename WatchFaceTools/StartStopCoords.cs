@@ -26,10 +26,14 @@ namespace WatchFaceTools
         /// <param name="startY">Y position to start from</param>
         /// <param name="rot">angle of rotation</param>
         /// <param name="len">length of the distance between start and stop</param>
-        public StartStopCoords(float startX, float startY, float rot, float len)
+        /// <param name="endcapRad">radius of the endcap of your </param>
+        public StartStopCoords(float startX, float startY, float rot, float len, float endcapRad = 0.0f)
         {
+            len += endcapRad;
             var xDiff = (float)Math.Sin(rot) * len;
             var yDiff = (float)-Math.Cos(rot) * len;
+            startX -= endcapRad;
+            startY -= endcapRad;
             var endX = startX + xDiff;
             var endY = startY + yDiff;
             sPos = new Coords { X = startX, Y = startY };

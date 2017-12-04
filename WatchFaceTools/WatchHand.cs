@@ -19,6 +19,10 @@ namespace WatchFaceTools
         private readonly float _startingRadius = 0.0f;
         private readonly float _endingRadius = 0.0f;
 
+        public float GetRotation()
+        {
+            return _rotation;
+        }
         public WatchHand(HandType type, HandStyle style, float centerX, float centerY, int length)
         {
             handType = type;
@@ -85,7 +89,7 @@ namespace WatchFaceTools
             var min = calendar.Get(CalendarField.Minute);
             var hr = calendar.Get(CalendarField.Hour);
             var ms = calendar.Get(CalendarField.Millisecond);
-            
+
             switch (handType)
             {
                 case HandType.MILLISECONDS:
@@ -125,6 +129,43 @@ namespace WatchFaceTools
             canvas.DrawLine(startCoords.X, startCoords.Y, stopCoords.X, stopCoords.Y, paint);
         }
 
+        public void DrawHand(Canvas canvas, Calendar calendar, float endcapRadius)
+        {
+            _rotation = GetRotation(calendar);
+            StartStopCoords coords;
+            if (!_isStartingAtCenter)
+            {
+                var innerX = (float)Math.Sin(_rotation) * _startingRadius;
+                var innerY = (float)-Math.Cos(_rotation) * _startingRadius;
+                var outerX = (float)Math.Sin(_rotation) * _endingRadius;
+                var outerY = (float)-Math.Cos(_rotation) * _endingRadius;
+                startCoords = new Coords { X = _centerX + innerX, Y = _centerY + innerY };
+                stopCoords = new Coords { X = _centerX + outerX, Y = _centerY + outerY };
+                coords = new StartStopCoords(startCoords, stopCoords);
+            }
+            else
+            {
+                coords = new StartStopCoords(_centerX, _centerY, _rotation, _length, endcapRadius);
+
+                startCoords = coords.sPos;
+                stopCoords = coords.ePos;
+            }
+
+
+
+            canvas.DrawLine(startCoords.X, startCoords.Y, stopCoords.X, stopCoords.Y, paint);
+
+        }
+
+        private const double TOLERANCE = 0.0;
+
+        //private void DrawHandAsRoundedRect(Canvas canvas, float handLength)
+        //{
+        //    canvas.DrawRoundRect(mCenterX - HAND_END_CAP_RADIUS,
+        //        mCenterY - handLength, mCenterX + HAND_END_CAP_RADIUS,
+        //        mCenterY + HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS,
+        //        HAND_END_CAP_RADIUS, mHandPaint);
+        //}
         private readonly bool _isStartingAtCenter;
 
         private void DrawHandAsTick(Canvas canvas)

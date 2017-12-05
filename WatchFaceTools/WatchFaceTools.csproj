@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WatchFaceTools</RootNamespace>
-    <AssemblyName>com.pixelsyndicate.WatchFaceTools</AssemblyName>
+    <AssemblyName>com.pixelsyndicate.xamarin.watchfacetools</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -49,7 +49,9 @@
     <Compile Include="HandType.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScreenElement.cs" />
     <Compile Include="StartStopCoords.cs" />
+    <Compile Include="TimeZoneReceiver.cs" />
     <Compile Include="WatchFaceFactory.cs" />
     <Compile Include="WatchHand.cs" />
     <Compile Include="WatchTicks.cs" />

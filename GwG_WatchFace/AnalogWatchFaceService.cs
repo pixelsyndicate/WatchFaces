@@ -10,7 +10,6 @@ using Android.Service.Wallpaper;
 using Android.Support.Wearable.Watchface;
 using Android.Util;
 using Android.Views;
-using Java.Util;
 using WatchFaceTools;
 
 namespace WatchFace
@@ -56,12 +55,10 @@ namespace WatchFace
 
             // Broadcast receiver for handling time zone changes:
             private static TimeZoneReceiver _timeZoneReceiver;
-
             private static bool _registeredTimezoneReceiver;
 
             // device features
             private bool _hasLowBitAmbient;
-
             private bool _hasBurnInProtection;
 
             // graphic objects
@@ -80,12 +77,18 @@ namespace WatchFace
             private Paint _tickPaint;
             private Paint _minuteTickPaint;
 
+            // dynamic watchhand colors https://codelabs.developers.google.com/codelabs/watchface/index.html#4
+            private int _watchHandColor, _watchHandShadowColor;
+
             // hand paint elements
             private const float HAND_END_CAP_RADIUS = 4f;
             private const float SHADOW_RADIUS = 6f;
 
             private WatchHand _secHand, _minHand, _hrHand, _milHand;
             private float _minLength, _hrLength, _secLength;
+
+            // device screen info
+            private float _centerX, _centerY;
 
             /// <summary>
             /// Use this to instantiate the Handler for _mUpdateTimeHandler and
@@ -94,6 +97,8 @@ namespace WatchFace
             /// <param name="self"></param>
             private static void Init(AnalogEngine self)
             {
+                
+
                 _dateTimeAdapter = new DateTimeAdapter();
                 _mUpdateTimeHandler = new Handler(message =>
                 {
@@ -141,12 +146,15 @@ namespace WatchFace
             {
                 _owner = self;
                 Init(this);
+
+                _watchHandColor = Color.White;
+                _watchHandShadowColor = Color.Black;
             }
 
             // Reference to the CanvasWatchFaceService that instantiates this engine:
             private readonly CanvasWatchFaceService _owner;
 
-            private float _centerX, _centerY;
+           
 
 
             /// <summary>
@@ -179,6 +187,9 @@ namespace WatchFace
                 // load the background image(s)
                 _backgroundBitmap = BitmapFactory.DecodeResource(Res, Resource.Drawable.gwg_background);
                 _aodBackgroundBitmap = BitmapFactory.DecodeResource(Res, Resource.Drawable.gwg_aod);
+
+                // dynamically update the watchhand colors based on the background image
+                
 
                 // configure a foreground image for use later (bullet hole)
                 _hubBitmap = BitmapFactory.DecodeResource(Res, Resource.Drawable.bullet_hole);

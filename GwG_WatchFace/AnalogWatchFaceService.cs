@@ -44,7 +44,9 @@ namespace WatchFace
 
             //  30 frames per second 1000/30 = 33
             //  20 frames per second 1000/20 = 50
-            private const int INTERACTIVE_UPDATE_RATE_MS = 50;
+            //  15 frames per second 1000/15 = 66
+            //  10 frames per second 1000/10 = 100
+            private const int INTERACTIVE_UPDATE_RATE_MS = 100;
 
             // this gets refreshed OnCreate,
             private Java.Util.Calendar _calendar;
@@ -292,7 +294,7 @@ namespace WatchFace
                 // set a default background color
                 canvas.DrawColor(Color.Black);
 
-              //  canvas.DrawBitmap(_backgroundScaledBitmap, 0, 0, _facePaint);
+                //  canvas.DrawBitmap(_backgroundScaledBitmap, 0, 0, _facePaint);
 
                 // draw the face ticks (if not in ambient mode)
                 _facePaint.Alpha = IsInAmbientMode ? 100 : 255;
@@ -363,24 +365,6 @@ namespace WatchFace
                         paint = _minutePaint
                     };
                     _minHand.DrawHand(canvas, _calendar, HAND_END_CAP_RADIUS);
-
-                    // todo: test drawing straight hands by roating the canvas
-                    //var hollowPaint = new Paint
-                    //{
-                    //  //  AntiAlias = true,
-                    //    Color = Color.Yellow,
-                    //    StrokeWidth = 4f
-                    //};
-                    //hollowPaint.SetShadowLayer(0.4f, 0, 0, Color.Black);
-                    //hollowPaint.SetStyle(Paint.Style.Stroke);
-                    //var minRot = _minHand.GetRotation();
-                    //canvas.Save();
-                    //canvas.Rotate(minRot, _centerX, _centerY);
-                    //float left, top, right, bottom;
-                    //DrawHandAsRoundedRect(canvas, _minLength, hollowPaint);
-                    //canvas.Restore();
-
-
 
                     // Draw the hour hand:
                     _hrHand = new WatchHand(HandType.HOURS, HandStyle.CENTRIC, _centerX, _centerY, (int)_hrLength)

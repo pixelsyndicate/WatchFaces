@@ -4,39 +4,21 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
-using Android.Service.Wallpaper;
 using Android.Support.Wearable.Watchface;
 using Android.Util;
 using Android.Views;
-using Java.Util;
 using WatchFaceTools;
-using TimeZone = Java.Util.TimeZone;
 
 namespace WatchFace
 {
-    /// <summary>
-    ///   AnalogWatchFaceService implements only one method, OnCreateEngine, and it defines a nested class that is derived from
-    ///   CanvasWatchFaceService.Engine.
-    ///   This namespace is noted in the manifect file... Manifest > Application > Service lists the name of the appliction to
-    ///   be "watchface.AnalogWatchFaceService"
-    /// </summary>
-    public class AnalogWatchFaceService : CanvasWatchFaceService
+    public partial class AnalogWatchFaceService
     {
-        // Used for logging:
-        private const string Tag = "AnalogWatchFaceService";
-
-        //   Must be implemented to return a new instance of the wallpaper's engine
-        public override WallpaperService.Engine OnCreateEngine()
-        {
-            return new AnalogEngine(this);
-        }
-
-
         /// <summary>
         ///   Class used for the watch face that draws on the Canvas
         /// </summary>
         private class AnalogEngine : Engine
         {
+            private static IDateTime _dateTimeAdapter;
             private const int MSG_UPDATE_TIME = 0;
 
             //  30 frames per second 1000/30 = 33
@@ -45,10 +27,8 @@ namespace WatchFace
             //  10 frames per second 1000/10 = 100
             private const int INTERACTIVE_UPDATE_RATE_MS = 100;
 
-            // hand paint elements
-            private const float HAND_END_CAP_RADIUS = 4f;
-            private const float SHADOW_RADIUS = 6f;
-            private static IDateTime _dateTimeAdapter;
+            // this gets refreshed OnCreate,
+            private Java.Util.Calendar _calendar;
 
             // this will recieve messages from UpdateTimer() or itself
             private static Handler _mUpdateTimeHandler;
@@ -57,40 +37,85 @@ namespace WatchFace
             private static TimeZoneReceiver _timeZoneReceiver;
             private static bool _registeredTimezoneReceiver;
 
-            // Reference to the CanvasWatchFaceService that instantiates this engine:
-            private readonly CanvasWatchFaceService _owner;
-            private Bitmap _aodBackgroundBitmap;
-            private Bitmap _aodBackgroundScaledBitmap;
+            // device features
+            private bool _hasLowBitAmbient;
+            private bool _hasBurnInProtection;
 
             // graphic objects
             private Bitmap _backgroundBitmap;
             private Bitmap _backgroundScaledBitmap;
-
-            // this gets refreshed OnCreate,
-            private Calendar _calendar;
-
-            // device screen info
-            private float _centerX, _centerY;
-            private Paint _datePaint;
-
-            private Paint _facePaint;
-            private bool _hasBurnInProtection;
-
-            // device features
-            private bool _hasLowBitAmbient;
-            private Paint _hourPaint;
+            private Bitmap _aodBackgroundBitmap;
+            private Bitmap _aodBackgroundScaledBitmap;
             private Bitmap _hubBitmap;
             private Bitmap _hubScaledBitmap;
-            private float _minLength, _hrLength, _secLength;
-            private Paint _minutePaint;
-            private Paint _minuteTickPaint;
 
-            private WatchHand _secHand, _minHand, _hrHand, _milHand;
+            private Paint _facePaint;
+            private Paint _hourPaint;
+            private Paint _minutePaint;
             private Paint _secondPaint;
+            private Paint _datePaint;
             private Paint _tickPaint;
+            private Paint _minuteTickPaint;
 
             // dynamic watchhand colors https://codelabs.developers.google.com/codelabs/watchface/index.html#4
             private int _watchHandColor, _watchHandShadowColor;
+
+            // hand paint elements
+            private const float HAND_END_CAP_RADIUS = 4f;
+            private const float SHADOW_RADIUS = 6f;
+
+            private WatchHand _secHand, _minHand, _hrHand, _milHand;
+            private float _minLength, _hrLength, _secLength;
+
+            // device screen info
+            private float _centerX, _centerY;
+
+            /// <summary>
+            /// Use this to instantiate the Handler for _mUpdateTimeHandler and
+            /// use this to instantiate the _timeZoneReciever
+            /// </summary>
+            /// <param name="self"></param>
+            private static void Init(AnalogEngine self)
+            {
+                
+
+                _dateTimeAdapter = new DateTimeAdapter();
+                _mUpdateTimeHandler = new Handler(message =>
+                {
+                    switch (message.What)
+                    {
+                        case MSG_UPDATE_TIME:
+                            self.Invalidate();
+                            if (self.ShouldTimerBeRunning())
+                            {
+                                long timeMs = _dateTimeAdapter.UnixNow;
+                                long delayMs = INTERACTIVE_UPDATE_RATE_MS - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                                _mUpdateTimeHandler.SendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+                            }
+                            break;
+                    }
+                });
+
+                if (_registeredTimezoneReceiver)
+                {
+
+                }
+                else
+                {
+                    if (_timeZoneReceiver == null)
+                        _timeZoneReceiver = new TimeZoneReceiver
+                        {
+                            Receive = intent =>
+                            {
+                                self._calendar.TimeZone = Java.Util.TimeZone.Default;
+                                self.Invalidate();
+                            }
+                        };
+                    _registeredTimezoneReceiver = true;
+                    var filter = new IntentFilter(Intent.ActionTimezoneChanged);
+                    Application.Context.RegisterReceiver(_timeZoneReceiver, filter);
+                }
+            }
 
             public AnalogEngine(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
             {
@@ -106,55 +131,15 @@ namespace WatchFace
                 _watchHandShadowColor = Color.Black;
             }
 
-            /// <summary>
-            ///   Use this to instantiate the Handler for _mUpdateTimeHandler and
-            ///   use this to instantiate the _timeZoneReciever
-            /// </summary>
-            /// <param name="self"></param>
-            private static void Init(AnalogEngine self)
-            {
-                _dateTimeAdapter = new DateTimeAdapter();
-                _mUpdateTimeHandler = new Handler(message =>
-                {
-                    switch (message.What)
-                    {
-                        case MSG_UPDATE_TIME:
-                            self.Invalidate();
-                            if (self.ShouldTimerBeRunning())
-                            {
-                                var timeMs = _dateTimeAdapter.UnixNow;
-                                var delayMs = INTERACTIVE_UPDATE_RATE_MS - timeMs % INTERACTIVE_UPDATE_RATE_MS;
-                                _mUpdateTimeHandler.SendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-                            }
+            // Reference to the CanvasWatchFaceService that instantiates this engine:
+            private readonly CanvasWatchFaceService _owner;
 
-                            break;
-                    }
-                });
-
-                if (_registeredTimezoneReceiver)
-                {
-                }
-                else
-                {
-                    if (_timeZoneReceiver == null)
-                        _timeZoneReceiver = new TimeZoneReceiver
-                        {
-                            Receive = intent =>
-                            {
-                                self._calendar.TimeZone = TimeZone.Default;
-                                self.Invalidate();
-                            }
-                        };
-                    _registeredTimezoneReceiver = true;
-                    var filter = new IntentFilter(Intent.ActionTimezoneChanged);
-                    Application.Context.RegisterReceiver(_timeZoneReceiver, filter);
-                }
-            }
+           
 
 
             /// <summary>
-            ///   In ambient mode, the system calls the Engine.onTimeTick() method every minute.
-            ///   note: this is not the active face timer. that is your custom one.
+            /// In ambient mode, the system calls the Engine.onTimeTick() method every minute. 
+            /// note: this is not the active face timer. that is your custom one.
             /// </summary>
             public override void OnTimeTick()
             {
@@ -184,7 +169,7 @@ namespace WatchFace
                 _aodBackgroundBitmap = BitmapFactory.DecodeResource(Res, Resource.Drawable.gwg_aod);
 
                 // dynamically update the watchhand colors based on the background image
-
+                
 
                 // configure a foreground image for use later (bullet hole)
                 _hubBitmap = BitmapFactory.DecodeResource(Res, Resource.Drawable.bullet_hole);
@@ -220,20 +205,17 @@ namespace WatchFace
                 _minuteTickPaint.SetARGB(255, 159, 191, 255);
                 _minuteTickPaint.SetShadowLayer(1.1f, .5f, .5f, Color.Argb(120, 50, 50, 50));
 
-                _datePaint = new Paint { Alpha = 255, AntiAlias = true };
+                _datePaint = new Paint { Alpha = 255, AntiAlias = true, };
 
                 // allocate a Calendar to calculate local time using the UTC time and time zone
-                _calendar = Calendar.GetInstance(Locale.Default);
+                _calendar = Java.Util.Calendar.GetInstance(Java.Util.Locale.Default);
             }
 
             /// <summary>
-            ///   Use this to dig out some properties about the device screen
-            ///   You should take these device properties into account when drawing your watch face:
-            ///   For devices that use low-bit ambient mode, the screen supports fewer bits for each color in ambient mode, so you
-            ///   should disable anti-aliasing and bitmap filtering when the device switches to ambient mode.
-            ///   For devices that require burn-in protection, avoid using large blocks of white pixels in ambient mode and do not
-            ///   place content within 10 pixels of the edge of the screen, since the system shifts the content periodically to avoid
-            ///   pixel burn-in.
+            /// Use this to dig out some properties about the device screen
+            /// You should take these device properties into account when drawing your watch face:
+            ///  For devices that use low-bit ambient mode, the screen supports fewer bits for each color in ambient mode, so you should disable anti-aliasing and bitmap filtering when the device switches to ambient mode.
+            /// For devices that require burn-in protection, avoid using large blocks of white pixels in ambient mode and do not place content within 10 pixels of the edge of the screen, since the system shifts the content periodically to avoid pixel burn-in.
             /// </summary>
             /// <param name="properties"></param>
             public override void OnPropertiesChanged(Bundle properties)
@@ -248,7 +230,7 @@ namespace WatchFace
             /// <summary>
             ///   Called when the device enters or exits ambient mode.
             ///   In ambient mode, the watch face disables anti-aliasing while drawing.
-            ///   Good place to start any timers
+            ///  Good place to start any timers
             /// </summary>
             /// <param name="inAmbientMode"></param>
             public override void OnAmbientModeChanged(bool inAmbientMode)
@@ -260,14 +242,13 @@ namespace WatchFace
 
                 if (_hasLowBitAmbient)
                 {
-                    var antiAlias = !inAmbientMode;
+                    bool antiAlias = !inAmbientMode;
 
-                    _hourPaint.AntiAlias = antiAlias;
-                    _minutePaint.AntiAlias = antiAlias;
-                    _secondPaint.AntiAlias = antiAlias;
-                    _tickPaint.AntiAlias = antiAlias;
+                    _hourPaint.AntiAlias = (antiAlias);
+                    _minutePaint.AntiAlias = (antiAlias);
+                    _secondPaint.AntiAlias = (antiAlias);
+                    _tickPaint.AntiAlias = (antiAlias);
                 }
-
                 Invalidate();
                 UpdateTimer(); // kick of the ambient timer
             }
@@ -280,18 +261,18 @@ namespace WatchFace
             }
 
             /// <summary>
-            ///   Called to draw the watch face
-            ///   To achieve a high frame rate, which results in smooth animations, no intense computations should happen in onDraw
+            /// Called to draw the watch face
+            /// To achieve a high frame rate, which results in smooth animations, no intense computations should happen in onDraw
             /// </summary>
             /// <param name="canvas"></param>
             /// <param name="bounds"></param>
             public override void OnDraw(Canvas canvas, Rect bounds)
             {
                 // refresh calendar 
-                _calendar = Calendar.GetInstance(TimeZone.Default);
+                _calendar = Java.Util.Calendar.GetInstance(Java.Util.TimeZone.Default);
 
                 // check the time to see how long this drawing is going to take
-                var frameStartTimeMs = SystemClock.ElapsedRealtime();
+                long frameStartTimeMs = SystemClock.ElapsedRealtime();
 
                 // Determine the bounds of the drawing surface:
                 var width = bounds.Width();
@@ -307,12 +288,13 @@ namespace WatchFace
                 //  canvas.DrawBitmap(_backgroundScaledBitmap, 0, 0, _facePaint);
 
                 // draw the face ticks (if not in ambient mode)
-                _facePaint.Alpha = IsInAmbientMode ? 90 : 255;
+                _facePaint.Alpha = IsInAmbientMode ? 100 : 255;
                 var bgToDraw = IsInAmbientMode ? _aodBackgroundScaledBitmap : _backgroundScaledBitmap;
                 canvas.DrawBitmap(bgToDraw, 0, 0, _facePaint);
 
                 if (!IsInAmbientMode)
                 {
+
                     // Draw the hour ticks:
                     var hticks = new WatchTicks(_centerX, _centerY, 20, 5, -1) { TickPaint = _tickPaint };
                     hticks.DrawTicks(canvas, 12); // draw 12 of them.
@@ -326,50 +308,24 @@ namespace WatchFace
                 // draw something with the date (change the color based on AOD)
                 var dt = _dateTimeAdapter.Now.Date;
                 var str = dt.ToString("ddd, dd MMM"); // TUES, 08 APR
-                _datePaint.Color =
-                    ShouldTimerBeRunning() ? Color.Black : Color.Silver; // (change the color based on AOD)
-                Coords dateLocation = null;
+                _datePaint.Color = ShouldTimerBeRunning() ? Color.Black : Color.Silver; // (change the color based on AOD)
                 _datePaint.TextSize = _centerY / 10.0f;
-                dateLocation = new Coords(_centerX * 1.10f, _centerY * 1.25f);
                 var tf = Typeface.Create("Arial", TypefaceStyle.Bold);
                 _datePaint.SetTypeface(tf);
                 _datePaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(100, 50, 50, 50));
+                var dateLocation = new Coords(_centerX * 1.10f, _centerY * 1.25f);
                 canvas.DrawText(str, dateLocation.X, dateLocation.Y, _datePaint);
 
-                // also place a digital time
-                if (IsInAmbientMode)
-                {
-                    Paint timePaint = new Paint
-                    {
-                        TextSize = _centerY / 8.0f,
-                        Color = Color.Silver,
-                    };
-                    timePaint.SetTypeface(tf);
-                    timePaint.SetShadowLayer(1.5f, -1f, -1f, Color.Argb(100, 50, 50, 50));
-                    var strTime = _dateTimeAdapter.Now.ToShortTimeString();
-                    var timeLocation = new Coords(_centerX * .4f, _centerY * 1.25f);
 
-                    canvas.DrawText(strTime, timeLocation.X, timeLocation.Y, timePaint);
-                }
+                // draw a central hub (bullet hole?)
 
-
-
-
-
-
-
-                // draw a central hub (bullet hole?) only if NOT ambient
-                if (!IsInAmbientMode)
-                {
-                    var bhW = (int)(width / 4.0f);
-                    var bhH = (int)(height / 4.0f);
-                    var bhX = _centerX - bhW / 2.0f;
-                    var bhY = _centerY - bhH / 2.0f;
-                    if (_hubScaledBitmap == null)
-                        _hubScaledBitmap = Bitmap.CreateScaledBitmap(_hubBitmap, bhW, bhH, true /* filter */);
-                    canvas.DrawBitmap(_hubScaledBitmap, bhX, bhY, null);
-
-                }
+                var bhW = (int)(width / 4.0f);
+                var bhH = (int)(height / 4.0f);
+                var bhX = _centerX - bhW / 2.0f;
+                var bhY = _centerY - bhH / 2.0f;
+                if (_hubScaledBitmap == null)
+                    _hubScaledBitmap = Bitmap.CreateScaledBitmap(_hubBitmap, bhW, bhH, true /* filter */);
+                canvas.DrawBitmap(_hubScaledBitmap, bhX, bhY, null);
 
                 // set these lengths in the OnSurfaceChanged
                 //var minLength = centerX - 40;
@@ -389,7 +345,7 @@ namespace WatchFace
                     var milLength = 10;
                     var milPad = -10;
                     _milHand = new WatchHand(HandType.MILLISECONDS, HandStyle.OUTSIDE, _centerX, _centerY, milLength,
-                            milPad)
+                        milPad)
                     { paint = _secondPaint };
                     _milHand.DrawHand(canvas, _calendar);
 
@@ -450,15 +406,13 @@ namespace WatchFace
                 if (ShouldTimerBeRunning())
                 {
                     // recheck the time, and if drawing is taking too long, skip the next tick
-                    var delayMs = SystemClock.ElapsedRealtime() - frameStartTimeMs;
+                    long delayMs = SystemClock.ElapsedRealtime() - frameStartTimeMs;
                     if (delayMs > INTERACTIVE_UPDATE_RATE_MS)
                     {
                         // This scenario occurs when drawing all of the components takes longer than an actual frame. 
                         // It may be helpful to log how many times this happens, so you can fix it when it occurs.
                         if (Log.IsLoggable(Tag, LogPriority.Warn))
-                            Log.Warn(Tag,
-                                "OnDraw: long running draw (delayMs=" + delayMs + " > updateRateMs=" +
-                                INTERACTIVE_UPDATE_RATE_MS + ")");
+                            Log.Warn(Tag, "OnDraw: long running draw (delayMs=" + delayMs + " > updateRateMs=" + INTERACTIVE_UPDATE_RATE_MS + ")");
                         // In general, you don't want to redraw immediately, but on the next appropriate frame (else block below).
                         delayMs = 0;
                     }
@@ -470,13 +424,12 @@ namespace WatchFace
                         // interactive update rate up to 30 frames per second.
                         delayMs = INTERACTIVE_UPDATE_RATE_MS - delayMs;
                     }
-
                     _mUpdateTimeHandler.SendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
                 }
             }
 
             /// <summary>
-            ///   Use this to detect that the screen dimensions have changed, and re-scale stuff.
+            /// Use this to detect that the screen dimensions have changed, and re-scale stuff.
             /// </summary>
             /// <param name="holder"></param>
             /// <param name="format"></param>
@@ -486,22 +439,23 @@ namespace WatchFace
             {
                 base.OnSurfaceChanged(holder, format, width, height);
 
-                var mScale = width / (float)_backgroundBitmap.Width;
+                float mScale = ((float)width) / (float)_backgroundBitmap.Width;
 
                 _backgroundScaledBitmap =
                     Bitmap.CreateScaledBitmap(_backgroundBitmap,
-                        (int)(_backgroundBitmap.Width * mScale),
-                        (int)(_backgroundBitmap.Height * mScale), true);
+                    (int)(_backgroundBitmap.Width * mScale),
+                    (int)(_backgroundBitmap.Height * mScale), true);
 
                 _aodBackgroundScaledBitmap =
                     Bitmap.CreateScaledBitmap(_aodBackgroundBitmap,
-                        (int)(_aodBackgroundBitmap.Width * mScale),
-                        (int)(_aodBackgroundBitmap.Height * mScale), true);
+                    (int)(_aodBackgroundBitmap.Width * mScale),
+                    (int)(_aodBackgroundBitmap.Height * mScale), true);
 
                 // set the lengths of the watch hands
                 _hrLength = 0.5f * width / 2;
                 _minLength = 0.7f * width / 2;
                 _secLength = 0.9f * width / 2;
+
             }
 
             public override void OnVisibilityChanged(bool visible)
@@ -515,7 +469,7 @@ namespace WatchFace
                     RegisterTimezoneReceiver();
 
                     // Update time zone in case it changed while we weren't visible.
-                    _calendar.TimeZone = TimeZone.Default;
+                    _calendar.TimeZone = Java.Util.TimeZone.Default;
                 }
                 else
                 {
@@ -530,8 +484,12 @@ namespace WatchFace
             // a custom timer for while the watch is in interactive moce
             private void UpdateTimer()
             {
+
                 _mUpdateTimeHandler.RemoveMessages(MSG_UPDATE_TIME);
-                if (ShouldTimerBeRunning()) _mUpdateTimeHandler.SendEmptyMessage(MSG_UPDATE_TIME);
+                if (ShouldTimerBeRunning())
+                {
+                    _mUpdateTimeHandler.SendEmptyMessage(MSG_UPDATE_TIME);
+                }
             }
 
 
@@ -542,26 +500,35 @@ namespace WatchFace
             }
 
             /// <summary>
-            ///   Registers the time zone broadcast receiver (defined at the end of this file) to handle time zone change events:
+            /// Registers the time zone broadcast receiver (defined at the end of this file) to handle time zone change events:
             /// </summary>
             private void RegisterTimezoneReceiver()
             {
-                if (_registeredTimezoneReceiver) return;
+                if (_registeredTimezoneReceiver)
+                {
+                    return;
+                }
                 _registeredTimezoneReceiver = true;
-                var filter = new IntentFilter(Intent.ActionTimezoneChanged);
+                IntentFilter filter = new IntentFilter(Intent.ActionTimezoneChanged);
                 Application.Context.RegisterReceiver(_timeZoneReceiver, filter);
             }
 
 
             /// <summary>
-            ///   Unregisters the timezone Broadcast receiver:
+            /// Unregisters the timezone Broadcast receiver:
             /// </summary>
             private void UnregisterTimezoneReceiver()
             {
-                if (!_registeredTimezoneReceiver) return;
+                if (!_registeredTimezoneReceiver)
+                {
+                    return;
+                }
                 _registeredTimezoneReceiver = false;
                 Application.Context.UnregisterReceiver(_timeZoneReceiver);
             }
+
+
+
         }
     }
 }

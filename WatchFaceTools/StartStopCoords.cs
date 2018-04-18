@@ -39,5 +39,32 @@ namespace WatchFaceTools
             sPos = new Coords { X = startX, Y = startY };
             ePos = new Coords { X = endX, Y = endY };
         }
+
+
+
+        public static StartStopCoords GetOffsetCenterCoords(int centerX, int centerY, float rotation, float startingRadius, float endingRadius)
+        {
+            // coordinates for start position
+            Coords offsetInner = Coords.GetOffset(rotation, startingRadius);
+            //var innerX = (float)Math.Sin(rotation) * startingRadius;
+            //var innerY = (float)-Math.Cos(rotation) * startingRadius;
+
+            // coordinates for end position.
+            Coords offsetOuter = Coords.GetOffset(rotation, endingRadius);
+            //var outerX = (float)Math.Sin(rotation) * endingRadius;
+            //var outerY = (float)-Math.Cos(rotation) * endingRadius;
+
+            var startC = new Coords(centerX + offsetInner.X, centerY + offsetInner.Y);// new Coords { X = centerX + innerX, Y = centerY + innerY };
+            var endC = new Coords(centerX + offsetOuter.X, centerY + offsetOuter.Y);// new Coords { X = centerX + outerX, Y = centerY + outerY };
+
+            var toReturn = new StartStopCoords(startC, endC);
+            return toReturn;
+        }
+
+
+        public static StartStopCoords GetCenterCoords(int centerX, int centerY, float rotation, int length)
+        {
+            return new StartStopCoords(centerX, centerY, rotation, length);
+        }
     }
 }

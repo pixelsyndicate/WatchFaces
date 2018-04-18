@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GwG_WatchFace", "GwG_WatchF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatchFaceTools", "WatchFaceTools\WatchFaceTools.csproj", "{75931B11-C603-46D7-9239-7B6BEDEC3247}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wear", "Wear\Wear.csproj", "{D1583055-13B1-4997-B3BD-FDE39A8EB57C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,10 +23,6 @@ Global
 		{75931B11-C603-46D7-9239-7B6BEDEC3247}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75931B11-C603-46D7-9239-7B6BEDEC3247}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75931B11-C603-46D7-9239-7B6BEDEC3247}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1583055-13B1-4997-B3BD-FDE39A8EB57C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1583055-13B1-4997-B3BD-FDE39A8EB57C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1583055-13B1-4997-B3BD-FDE39A8EB57C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{D1583055-13B1-4997-B3BD-FDE39A8EB57C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,76 +1,84 @@
 ﻿using System;
 using Android.Graphics;
-using Android.Icu.Text;
-using Android.Text.Format;
+using Java.Util;
 
 namespace WatchFaceTools
 {
-
     public static class WatchFaceFactory
     {
-        public static float GetHandRotation(HandType type, Time time)
+        public static float GetHandRotation(HandType type, GregorianCalendar cal)
         {
             switch (type)
             {
                 case HandType.HOURS:
-                    return GetHourHandRotation(time);
+                    return GetHourHandRotation(cal);
                 case HandType.MINUTES:
-                    return GetMinuteHandRotation(time);
+                    return GetMinuteHandRotation(cal);
                 case HandType.SECONDS:
-                    return GetSecondHandRotation(time);
+                    return GetSecondHandRotation(cal);
                 case HandType.MILLISECONDS:
-                    return GetMillisecondHandRotation(time);
+                    return GetMillisecondHandRotation(cal);
                 default:
                     return 0.0f;
             }
         }
 
         /// <summary>
-        /// assuming the clock face is circular, and 12 is top-center, 
-        /// then pass in the TIME object and the angle will be returned for the Time.Second, with 30 divisions
+        ///   assuming the clock face is circular, and 12 is top-center,
+        ///   then pass in the TIME object and the angle will be returned for the Time.Second, with 30 divisions
         /// </summary>
-        /// <param name="time"></param>
-        /// <returns></returns>
-        private static float GetSecondHandRotation(Time time)
+        /// <param name="cal"></param>
+        /// <returns>float value representing 360 degree angle</returns>
+        private static float GetSecondHandRotation(GregorianCalendar cal)
         {
-            return time.Second / 30f * (float)Math.PI;
+            return cal.Get(CalendarField.Second) / 30f * (float)Math.PI;
         }
 
         /// <summary>
-        /// assuming the clock face is circular, and 12 is top-center, 
-        /// then pass in the TIME object and the angle will be returned for the Time.Minute, with 30 divisions
+        ///   assuming the clock face is circular, and 12 is top-center,
+        ///   then pass in the TIME object and the angle will be returned for the Time.Minute, with 30 divisions
         /// </summary>
-        /// <param name="time"></param>
-        /// <returns></returns>
-        private static float GetMinuteHandRotation(Time time)
+        /// <param name="cal"></param>
+        /// <returns>float value representing 360 degree angle</returns>
+        private static float GetMinuteHandRotation(GregorianCalendar cal)
         {
-            return time.Minute / 30f * (float)Math.PI;
+            return cal.Get(CalendarField.Minute) / 30f * (float)Math.PI;
+        }
+
+
+        /// <summary>
+        ///   assuming the clock face is circular, and 12 is top-center,
+        ///   then pass in the TIME object and the angle will be returned for the Time.Hour, with 12 divisions
+        /// </summary>
+        /// <param name="cal"></param>
+        /// <returns>float value representing 360 degree angle</returns>
+        private static float GetHourHandRotation(GregorianCalendar cal)
+        {
+            return (cal.Get(CalendarField.Hour) + cal.Get(CalendarField.Minute) / 60f) / 6f * (float)Math.PI;
         }
 
         /// <summary>
-        /// assuming the clock face is circular, and 12 is top-center, 
-        /// then pass in the TIME object and the angle will be returned for the Time.Hour, with 12 divisions
+        ///   assuming the clock face is circular, and 12 is top-center,
+        ///   then pass in the TIME object and the angle will be returned for the Time.Millisecond, with 100 divisions
         /// </summary>
-        /// <param name="time"></param>
-        /// <returns></returns>
-        private static float GetHourHandRotation(Time time)
+        /// <param name="cal"></param>
+        /// <returns>float value representing 360 degree angle</returns>
+        private static float GetMillisecondHandRotation(GregorianCalendar cal)
         {
-            return (time.Hour + time.Minute / 60f) / 6f * (float)Math.PI;
-        }
-
-        private static float GetMillisecondHandRotation(Time time)
-        {
-            SimpleDateFormat formatter = new SimpleDateFormat("SSS");
-            var msstr = formatter.Format(time);
-            int ms = int.Parse(msstr);
-            return ms / 100f * (float)Math.PI;
+            // SimpleDateFormat formatter = new SimpleDateFormat("SSS");
+            var milis = cal.Get(CalendarField.Millisecond);
+            //var msstr = formatter.Format(milis);
+            // int ms = int.Parse(msstr);
+            return milis / 100f * (float)Math.PI;
         }
 
         /// <summary>
-        /// Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default StrokeWidth
+        ///   Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default
+        ///   StrokeWidth
         /// </summary>
-        /// <param name="color"></param>   
-        /// /// <param name="shadow"></param>
+        /// <param name="color"></param>
+        /// ///
+        /// <param name="shadow"></param>
         /// <param name="pixelWidth"></param>
         /// <returns></returns>
         public static Paint GetHourHand(Color color, bool shadow = true, float pixelWidth = 8.0f)
@@ -91,7 +99,8 @@ namespace WatchFaceTools
         }
 
         /// <summary>
-        /// Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default StrokeWidth
+        ///   Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default
+        ///   StrokeWidth
         /// </summary>
         /// <param name="color"></param>
         /// <param name="shadow"></param>
@@ -108,7 +117,6 @@ namespace WatchFaceTools
         }
 
 
-
         public static Paint GetMinuteHand(int a, int r, int g, int b)
         {
             var toReturn = GetMinuteHand(Color.Black, false);
@@ -117,7 +125,8 @@ namespace WatchFaceTools
         }
 
         /// <summary>
-        /// Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default StrokeWidth
+        ///   Generates a Paint object of the specified color, with Shadow unless specified shadow = false, and a default
+        ///   StrokeWidth
         /// </summary>
         /// <param name="color"></param>
         /// <param name="Shadow"></param>
@@ -140,7 +149,8 @@ namespace WatchFaceTools
             return toReturn;
         }
 
-        public static StartStopCoords GetDrawLineStartAndStops(float centerX, float centerY, float rotation, float length)
+        public static StartStopCoords GetDrawLineStartAndStops(float centerX, float centerY, float rotation,
+            float length)
         {
             //  var testToReturn = new StartStopCoords(centerX, centerY, rotation, length);
             var xDiff = (float)Math.Sin(rotation) * length;
@@ -151,7 +161,6 @@ namespace WatchFaceTools
             var endAt = new Coords { X = endX, Y = endY };
             return new StartStopCoords(startAt, endAt);
         }
-
 
 
         private static Paint getGenericPaint()

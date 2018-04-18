@@ -17,6 +17,13 @@ namespace WatchFaceTools
 
         public float X { get; set; }
         public float Y { get; set; }
+
+        public static Coords GetOffset(float rot, float rad)
+        {
+            var x = (float)Math.Sin(rot) * rad;
+            var y = (float)-Math.Cos(rot) * rad;
+            return new Coords(x, y);
+        }
     }
 
     
